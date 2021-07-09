@@ -43,6 +43,85 @@ def test_cassette_recording(testdir):
     assert not cassette_path.exists()
 
 
+def test_disable_recording(testdir):
+    testdir.makepyfile(
+        """
+        import pytest
+        import requests
+
+        @pytest.mark.vcr
+        def test_(httpbin):
+            assert requests.get(httpbin.url + "/get").status_code == 200
+    """
+    )
+
+    # If recording is disabled
+    result = testdir.runpytest("--disable-recording")
+    result.assert_outcomes(passed=1)
+
+    # Then there should be no cassettes
+    cassette_path = testdir.tmpdir.join("cassettes/test_disable_recording/test_.yaml")
+    assert not cassette_path.exists()
+
+
+def test_record_mode_in_mark(testdir):
+    # See GH-47
+    testdir.makepyfile(
+        """
+        import pytest
+        import requests
+
+        @pytest.mark.vcr(record_mode="once")
+        def test_record_mode(httpbin):
+            assert requests.get(httpbin.url + "/get").status_code == 200
+    """
+    )
+    result = testdir.runpytest()
+    result.assert_outcomes(passed=1)
+    cassette_path = testdir.tmpdir.join("cassettes/test_record_mode_in_mark/test_record_mode.yaml")
+    assert cassette_path.size()
+
+
+def test_override_default_cassette(testdir):
+    testdir.makepyfile(
+        """
+        import pytest
+        import requests
+
+        @pytest.mark.default_cassette("foo.yaml")
+        @pytest.mark.vcr(record_mode="once")
+        def test_record_mode(httpbin):
+            assert requests.get(httpbin.url + "/get").status_code == 200
+    """
+    )
+    result = testdir.runpytest()
+    result.assert_outcomes(passed=1)
+    cassette_path = testdir.tmpdir.join("cassettes/test_override_default_cassette/foo.yaml")
+    assert cassette_path.size()
+
+
+def test_record_mode_in_config(testdir):
+    # See GH-47
+    testdir.makepyfile(
+        """
+        import pytest
+        import requests
+
+        @pytest.fixture(scope="module")
+        def vcr_config():
+            return {"record_mode": "once"}
+
+        @pytest.mark.vcr
+        def test_record_mode(httpbin):
+            assert requests.get(httpbin.url + "/get").status_code == 200
+    """
+    )
+    result = testdir.runpytest()
+    result.assert_outcomes(passed=1)
+    cassette_path = testdir.tmpdir.join("cassettes/test_record_mode_in_config/test_record_mode.yaml")
+    assert cassette_path.size()
+
+
 def test_cassette_recording_rewrite(testdir):
     testdir.makepyfile(
         """
@@ -196,19 +275,21 @@ import requests
 
 pytestmark = [pytest.mark.vcr()]
 
-@pytest.mark.parametrize("value", ("/A",))
+@pytest.mark.parametrize("value", ("/A", "../foo", "/foo/../bar", "foo/../../bar"))
 def test_network(httpbin, value):
     assert requests.get(httpbin.url + "/ip").status_code == 200
     """
     )
 
     result = testdir.runpytest("--record-mode=all")
-    result.assert_outcomes(passed=1)
+    result.assert_outcomes(passed=4)
 
     # Then those characters should be replaced
     assert not testdir.tmpdir.join("cassettes/test_forbidden_characters/test_network[").exists()
     cassette_path = testdir.tmpdir.join("cassettes/test_forbidden_characters/test_network[-A].yaml")
     assert cassette_path.size()
+    cassettes_dir = testdir.tmpdir.join("cassettes/test_forbidden_characters")
+    assert len(cassettes_dir.listdir()) == 4
 
 
 def test_json_serializer(testdir):

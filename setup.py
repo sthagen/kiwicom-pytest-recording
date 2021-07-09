@@ -1,18 +1,10 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 import codecs
 import os
-import sys
 
 from setuptools import find_packages, setup
 
-install_requires = ["vcrpy>=2.0.1", "attrs"]
-
-if sys.version_info[0] == 2:
-    install_requires.append("pytest>=3.5.0,<5.0")
-else:
-    install_requires.append("pytest>=3.5.0")
+install_requires = ["vcrpy>=2.0.1", "pytest>=3.5.0", "attrs"]
 
 
 def read(fname):
@@ -22,19 +14,19 @@ def read(fname):
 
 setup(
     name="pytest-recording",
-    version="0.7.0",
+    version="0.12.0",
     author="Dmitry Dygalo",
-    author_email="dmitry.dygalo@kiwi.com",
+    author_email="dadygalo@gmail.com",
     maintainer="Dmitry Dygalo",
-    maintainer_email="dmitry.dygalo@kiwi.com",
+    maintainer_email="dadygalo@gmail.com",
     url="https://github.com/kiwicom/pytest-recording",
     license="MIT",
-    description="A pytest plugin that allows to record network interactions via VCR.py",
+    description="A pytest plugin that allows you recording of network interactions via VCR.py",
     long_description=read("README.rst"),
     long_description_content_type="text/x-rst",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
-    python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*",
+    python_requires=">=3.5",
     install_requires=install_requires,
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -42,13 +34,13 @@ setup(
         "Intended Audience :: Developers",
         "Topic :: Software Development :: Testing",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3 :: Only",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
         "Operating System :: OS Independent",

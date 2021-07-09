@@ -28,7 +28,7 @@ jobs:
           python-version: 3.7
 
       - run: pip install pre-commit
-      - run: SKIP=pylint pre-commit run --all-files
+      - run: SKIP=pylint,mypy pre-commit run --all-files
 
   pylint:
     name: Pylint
@@ -45,15 +45,28 @@ jobs:
       - run: pip install pre-commit
       - run: pre-commit run pylint --all-files
 
+  mypy:
+    name: Mypy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+
+      - run: pip install pre-commit
+      - run: pre-commit run mypy --all-files
+
   tests:
     name: tests_${{ matrix.tox_job }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        tox_job: [py27, py35, py36, py37, py38, no_pycurl, pypy, pypy3]
+        tox_job: [py35, py36, py37, py38, py39, no_pycurl]
         include:
-          - tox_job: py27
-            python: 2.7
           - tox_job: py35
             python: 3.5
           - tox_job: py36
@@ -62,19 +75,17 @@ jobs:
             python: 3.7
           - tox_job: py38
             python: 3.8
+          - tox_job: py39
+            python: 3.9
           - tox_job: no_pycurl
             python: 3.8
-          - tox_job: pypy
-            python: pypy2
-          - tox_job: pypy3
-            python: pypy3
 
     steps:
       - uses: actions/checkout@v1
         with:
           fetch-depth: 1
 
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python }}
 
@@ -92,6 +103,6 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1.0.2
         with:
-          token: ${{secrets.CODECOV_TOKEN}}
+          token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage.xml
           flags: unittests

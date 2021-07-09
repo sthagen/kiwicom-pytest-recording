@@ -6,6 +6,69 @@ Changelog
 `Unreleased`_
 -------------
 
+`0.12.0`_ - 2021-07-08
+----------------------
+
+Fixed
+~~~~~
+
+- Honor ``record_mode`` set via the ``vcr_config`` fixture or the ``vcr`` mark when ``block_network`` is applied. `#68`_
+
+Changed
+~~~~~~~
+
+- Validate input arguments for ``vcr`` and ``block_network`` pytest marks. `#69`_
+
+`0.11.0`_ - 2020-11-25
+----------------------
+
+Added
+~~~~~
+
+- ``--disable-recording`` CLI option to completely disable the VCR.py integration. `#64`_
+
+`0.10.0`_ - 2020-10-06
+----------------------
+
+Added
+~~~~~
+
+- The ``pytest.mark.default_cassette`` marker that overrides the default cassette name.
+
+`0.9.0`_ - 2020-08-13
+---------------------
+
+Added
+~~~~~
+
+- Type annotations to the plugin's internals.
+
+Fixed
+~~~~~
+
+- ``TypeError`` when using network blocking with address as ``bytes`` or ``bytearray``. `#55`_
+
+Removed
+~~~~~~~
+
+- Python 2 support. `#53`_
+
+`0.8.1`_ - 2020-06-13
+---------------------
+
+Fixed
+~~~~~
+
+- Honor ``record_mode`` passed via ``pytest.mark.vcr`` mark or in ``vcr_config`` fixture. `#47`_
+
+`0.8.0`_ - 2020-06-06
+---------------------
+
+Added
+~~~~~
+
+- New ``pytest_recording_configure`` hook that can be used for registering custom matchers, persisters, etc. `#45`_
+
 `0.7.0`_ - 2020-04-18
 ---------------------
 
@@ -111,7 +174,13 @@ Added
 
 - Initial public release
 
-.. _Unreleased: https://github.com/kiwicom/pytest-recording/compare/v0.7.0...HEAD
+.. _Unreleased: https://github.com/kiwicom/pytest-recording/compare/v0.12.0...HEAD
+.. _0.12.0: https://github.com/kiwicom/pytest-recording/compare/v0.11.0...v0.12.0
+.. _0.11.0: https://github.com/kiwicom/pytest-recording/compare/v0.10.0...v0.11.0
+.. _0.10.0: https://github.com/kiwicom/pytest-recording/compare/v0.9.0...v0.10.0
+.. _0.9.0: https://github.com/kiwicom/pytest-recording/compare/v0.8.1...v0.9.0
+.. _0.8.1: https://github.com/kiwicom/pytest-recording/compare/v0.8.0...v0.8.1
+.. _0.8.0: https://github.com/kiwicom/pytest-recording/compare/v0.7.0...v0.8.0
 .. _0.7.0: https://github.com/kiwicom/pytest-recording/compare/v0.6.0...v0.7.0
 .. _0.6.0: https://github.com/kiwicom/pytest-recording/compare/v0.5.0...v0.6.0
 .. _0.5.0: https://github.com/kiwicom/pytest-recording/compare/v0.4.0...v0.5.0
@@ -125,6 +194,13 @@ Added
 .. _0.3.0: https://github.com/kiwicom/pytest-recording/compare/v0.2.0...v0.3.0
 .. _0.2.0: https://github.com/kiwicom/pytest-recording/compare/v0.1.0...v0.2.0
 
+.. _#69: https://github.com/kiwicom/pytest-recording/issues/69
+.. _#68: https://github.com/kiwicom/pytest-recording/issues/68
+.. _#64: https://github.com/kiwicom/pytest-recording/issues/64
+.. _#55: https://github.com/kiwicom/pytest-recording/issues/55
+.. _#53: https://github.com/kiwicom/pytest-recording/issues/53
+.. _#47: https://github.com/kiwicom/pytest-recording/issues/47
+.. _#45: https://github.com/kiwicom/pytest-recording/issues/45
 .. _#37: https://github.com/kiwicom/pytest-recording/issues/37
 .. _#34: https://github.com/kiwicom/pytest-recording/issues/34
 .. _#20: https://github.com/kiwicom/pytest-recording/issues/20

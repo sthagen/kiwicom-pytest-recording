@@ -10,8 +10,18 @@ except ImportError as exc:
     pycurl = None
 
 
-def test_blocked_network_recording(testdir):
-    # When record is enabled
+def assert_network_blocking(testdir, dirname):
+    result = testdir.runpytest("--record-mode=all")
+    # Then all network requests in tests with block_network mark except for marked with pytest.mark.vcr should fail
+    result.assert_outcomes(passed=3)
+
+    # And a cassette is recorded for the case where pytest.mark.vcr is applied
+    cassette_path = testdir.tmpdir.join("cassettes/{}/test_recording.yaml".format(dirname))
+    assert cassette_path.exists()
+
+
+def test_blocked_network_recording_cli_arg(testdir):
+    # When record is enabled via a CLI arg
     testdir.makepyfile(
         """
 import pytest
@@ -31,14 +41,60 @@ def test_error(httpbin):
         assert requests.get(httpbin.url + "/ip").status_code == 200
     """
     )
+    assert_network_blocking(testdir, "test_blocked_network_recording_cli_arg")
 
-    result = testdir.runpytest("--record-mode=all")
-    # Then all network requests in tests with block_network mark except for marked with pytest.mark.vcr should fail
-    result.assert_outcomes(passed=3)
 
-    # And a cassette is recorded for the case where pytest.mark.vcr is applied
-    cassette_path = testdir.tmpdir.join("cassettes/test_blocked_network_recording/test_recording.yaml")
-    assert cassette_path.exists()
+def test_blocked_network_recording_vcr_config(testdir):
+    # When record is enabled via the `vcr_config` fixture
+    testdir.makepyfile(
+        """
+import pytest
+import requests
+
+@pytest.fixture(autouse=True)
+def vcr_config():
+    return {"record_mode": "once"}
+
+
+def test_no_blocking(httpbin):
+    assert requests.get(httpbin.url + "/ip").status_code == 200
+
+@pytest.mark.block_network
+@pytest.mark.vcr
+def test_recording(httpbin):
+    assert requests.get(httpbin.url + "/ip").status_code == 200
+
+@pytest.mark.block_network
+def test_error(httpbin):
+    with pytest.raises(RuntimeError, match=r"^Network is disabled$"):
+        assert requests.get(httpbin.url + "/ip").status_code == 200
+    """
+    )
+    assert_network_blocking(testdir, "test_blocked_network_recording_vcr_config")
+
+
+def test_blocked_network_recording_vcr_mark(testdir):
+    # When record is enabled via the `vcr` mark
+    testdir.makepyfile(
+        """
+import pytest
+import requests
+
+def test_no_blocking(httpbin):
+    assert requests.get(httpbin.url + "/ip").status_code == 200
+
+@pytest.mark.block_network
+@pytest.mark.vcr(record_mode="once")
+def test_recording(httpbin):
+    assert requests.get(httpbin.url + "/ip").status_code == 200
+
+@pytest.mark.block_network
+def test_error(httpbin):
+    with pytest.raises(RuntimeError, match=r"^Network is disabled$"):
+        assert requests.get(httpbin.url + "/ip").status_code == 200
+    """
+    )
+    assert_network_blocking(testdir, "test_blocked_network_recording_vcr_mark")
 
 
 def test_socket_connect(testdir):
@@ -149,11 +205,24 @@ def test_with_vcr_mark(httpbin):
 def test_no_vcr_mark(httpbin):
     with pytest.raises(RuntimeError, match=r"^Network is disabled$"):
         requests.get(httpbin.url + "/ip")
+
+
+@pytest.mark.block_network(allowed_hosts=["127.0.0.2"])
+def test_no_vcr_mark_bytes():
+    with pytest.raises(RuntimeError, match=r"^Network is disabled$"):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.connect((b"127.0.0.1", 80))
+
+@pytest.mark.block_network(allowed_hosts=["127.0.0.2"])
+def test_no_vcr_mark_bytearray():
+    with pytest.raises(RuntimeError, match=r"^Network is disabled$"):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.connect((bytearray(b"127.0.0.1"), 80))
     """
     )
 
-    result = testdir.runpytest()
-    result.assert_outcomes(passed=2)
+    result = testdir.runpytest("-s")
+    result.assert_outcomes(passed=4)
 
 
 @pytest.mark.parametrize(
@@ -387,3 +456,25 @@ def test_critical_error():
     result.assert_outcomes(passed=1)
     # NOTE. In reality it is not likely to happen - e.g. if pytest will partially crash and will not call the teardown
     # part of the generator, but this try/finally implementation could also guard against errors on manual
+
+
+@pytest.mark.parametrize("args", ("foo=42", "42"))
+def test_invalid_input_arguments(testdir, args):
+    # When the `block_network` mark receives an unknown argument
+    testdir.makepyfile(
+        """
+import pytest
+import requests
+
+@pytest.mark.block_network({})
+def test_request():
+    requests.get("https://google.com")
+    """.format(
+            args
+        )
+    )
+    result = testdir.runpytest()
+    # Then there should be an error
+    result.assert_outcomes(errors=1)
+    expected = "Invalid arguments to `block_network`. It accepts only the following keyword arguments: `allowed_hosts`."
+    assert expected in result.stdout.str()

@@ -6,6 +6,11 @@ Changelog
 `Unreleased`_
 -------------
 
+`0.12.1`_ - 2022-06-20
+----------------------
+
+- Allow ``block_network.allowed_hosts`` configuration via ``vcr_config`` fixture. `#82`_
+
 `0.12.0`_ - 2021-07-08
 ----------------------
 
@@ -174,7 +179,8 @@ Added
 
 - Initial public release
 
-.. _Unreleased: https://github.com/kiwicom/pytest-recording/compare/v0.12.0...HEAD
+.. _Unreleased: https://github.com/kiwicom/pytest-recording/compare/v0.12.1...HEAD
+.. _0.12.1: https://github.com/kiwicom/pytest-recording/compare/v0.12.0...v0.12.1
 .. _0.12.0: https://github.com/kiwicom/pytest-recording/compare/v0.11.0...v0.12.0
 .. _0.11.0: https://github.com/kiwicom/pytest-recording/compare/v0.10.0...v0.11.0
 .. _0.10.0: https://github.com/kiwicom/pytest-recording/compare/v0.9.0...v0.10.0
@@ -194,6 +200,7 @@ Added
 .. _0.3.0: https://github.com/kiwicom/pytest-recording/compare/v0.2.0...v0.3.0
 .. _0.2.0: https://github.com/kiwicom/pytest-recording/compare/v0.1.0...v0.2.0
 
+.. _#82: https://github.com/kiwicom/pytest-recording/pull/82
 .. _#69: https://github.com/kiwicom/pytest-recording/issues/69
 .. _#68: https://github.com/kiwicom/pytest-recording/issues/68
 .. _#64: https://github.com/kiwicom/pytest-recording/issues/64

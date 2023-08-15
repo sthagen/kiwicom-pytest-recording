@@ -25,33 +25,28 @@ repos:
       - id: yamllint
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.34.0
+    rev: v0.35.0
     hooks:
       - id: markdownlint
         language_version: system
 
-  - repo: https://github.com/PyCQA/pydocstyle
-    rev: 6.3.0
-    hooks:
-      - id: pydocstyle
-
   - repo: https://github.com/codingjoe/relint
-    rev: 3.0.0
+    rev: 3.1.0
     hooks:
       - id: relint
 
   - repo: https://github.com/ambv/black
-    rev: 23.3.0
+    rev: 23.7.0
     hooks:
       - id: black
         types: [python]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.3.0
+    rev: v1.4.1
     hooks:
       - id: mypy
         exclude: ^(docs/|tests/|setup.py).*$
-        additional_dependencies: [ "types-attrs", "types-pycurl" ]
+        additional_dependencies: [ "types-pycurl" ]
 
   - repo: https://github.com/asottile/seed-isort-config
     rev: v2.2.0
@@ -63,10 +58,7 @@ repos:
     hooks:
       - id: isort
 
-  - repo: https://github.com/pre-commit/mirrors-pylint
-    rev: v3.0.0a5
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.0.281
     hooks:
-      - id: pylint
-        exclude: ^(docs/).*$
-        # disabled import-error as may be run out of environment with deps
-        args: ["--disable=import-error"]
+      - id: ruff

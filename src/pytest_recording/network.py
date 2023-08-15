@@ -2,22 +2,21 @@ import re
 import socket
 import sys
 from contextlib import contextmanager
+from dataclasses import dataclass, field
 from typing import Any, Callable, Iterator, List, Optional, Tuple, Union
 from urllib.parse import urlparse
-
-import attr
 
 try:
     import pycurl
 
-    @attr.s(slots=True)
+    @dataclass
     class Curl:
         """Proxy to real pycurl.Curl.
 
         If `perform` is called then it will raise an error if network is disabled via `disable`
         """
 
-        handle = attr.ib(factory=pycurl.Curl, type=pycurl.Curl)
+        handle: pycurl.Curl = field(default_factory=pycurl.Curl)
         url = None  # type: Optional[str]
 
         def __getattribute__(self, item: str) -> Any:
@@ -58,7 +57,7 @@ _disable_pycurl = False
 _allowed_hosts = None  # type: ignore
 
 
-@attr.s(slots=True, hash=True)
+@dataclass(unsafe_hash=True)
 class PyCurlWrapper:
     """Imitate pycurl module."""
 
@@ -71,7 +70,7 @@ class PyCurlWrapper:
 def check_pycurl_installed(func: Callable) -> Callable:
     """No-op if pycurl is not installed."""
 
-    def inner(*args: Any, **kwargs: Any) -> Any:  # pylint: disable=inconsistent-return-statements
+    def inner(*args: Any, **kwargs: Any) -> Any:
         if pycurl is None:
             return  # type: ignore
         return func(*args, **kwargs)
@@ -90,15 +89,15 @@ def uninstall_pycurl_wrapper() -> None:
 
 
 def block_pycurl(allowed_hosts: Optional[List[str]] = None) -> None:
-    global _disable_pycurl  # pylint: disable=global-statement
-    global _allowed_hosts  # pylint: disable=global-statement
+    global _disable_pycurl
+    global _allowed_hosts
     _disable_pycurl = True
     _allowed_hosts = allowed_hosts
 
 
 def unblock_pycurl() -> None:
-    global _disable_pycurl  # pylint: disable=global-statement
-    global _allowed_hosts  # pylint: disable=global-statement
+    global _disable_pycurl
+    global _allowed_hosts
     _disable_pycurl = False
     _allowed_hosts = None
 
@@ -143,6 +142,7 @@ def blocking_context(allowed_hosts: Optional[List[str]] = None) -> Iterator[None
     """Block connections via socket and pycurl.
 
     Note:
+    ----
         Only connections to remotes are blocked in `socket`.
         Local servers are not touched since it could interfere with live servers needed for tests (e.g. pytest-httpbin)
 

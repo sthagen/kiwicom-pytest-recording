@@ -1,16 +1,23 @@
 import os
 from copy import deepcopy
+from dataclasses import dataclass
 from itertools import chain, starmap
 from types import ModuleType
 from typing import Any, Callable, Dict, List, Tuple
 
-import attr
 from _pytest.config import Config
 from _pytest.mark.structures import Mark
 from vcr import VCR
 from vcr.cassette import CassetteContextDecorator
 from vcr.persisters.filesystem import FilesystemPersister
 from vcr.serialize import deserialize
+
+try:
+    # VCR.py >=5
+    from vcr.cassette import CassetteNotFoundError
+except ImportError:
+    # VCR.py <5
+    CassetteNotFoundError = ValueError
 
 from .utils import unique, unpack
 
@@ -26,17 +33,13 @@ def load_cassette(cassette_path: str, serializer: ModuleType) -> Tuple[List, Lis
     return deserialize(cassette_content, serializer)
 
 
-@attr.s(slots=True)
+@dataclass
 class CombinedPersister(FilesystemPersister):
     """Load extra cassettes, but saves only the first one."""
 
-    extra_paths = attr.ib(type=List[str])
+    extra_paths: List[str]
 
-    # FilesystemPersister.load_casette is a classmethod, which
-    # is likely why pylint gives an error.
-    def load_cassette(  # pylint: disable=arguments-differ
-        self, cassette_path: str, serializer: ModuleType
-    ) -> Tuple[List, List]:
+    def load_cassette(self, cassette_path: str, serializer: ModuleType) -> Tuple[List, List]:
         all_paths = chain.from_iterable(((cassette_path,), self.extra_paths))
         # Pairs of 2 lists per cassettes:
         all_content = (load_cassette(path, serializer) for path in unique(all_paths))
@@ -49,11 +52,10 @@ class CombinedPersister(FilesystemPersister):
         requests, responses = starmap(unpack, zip(*all_content))
         requests, responses = list(requests), list(responses)
         if not requests or not responses:
-            raise ValueError("No cassettes found.")
+            raise CassetteNotFoundError("No cassettes found.")
         return requests, responses
 
 
-# pylint: disable=too-many-arguments
 def use_cassette(
     default_cassette: str,
     vcr_cassette_dir: str,

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pytest-recording"
-version = "0.13.0"
+version = "0.13.1"
 description = "A pytest plugin that allows you recording of network interactions via VCR.py"
 keywords = ["pytest", "vcr", "network", "mock"]
 authors = [{ name = "Dmitry Dygalo", email = "dmitry@dygalo.dev" }]
@@ -16,6 +16,7 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Framework :: Pytest",
     "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
     "Topic :: Software Development :: Testing",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3 :: Only",
@@ -27,6 +28,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
     "Operating System :: OS Independent",
@@ -40,7 +42,7 @@ tests = [
     "pytest-httpbin",
     "pytest-mock",
     "requests",
-    "Werkzeug==2.3.6"
+    "Werkzeug==3.0.1"
 ]
 dev = ["pytest_recording[tests]"]
 
@@ -49,24 +51,12 @@ Documentation = "https://github.com/kiwicom/pytest-recording"
 Changelog = "https://github.com/kiwicom/pytest-recording/blob/master/docs/changelog.rst"
 "Bug Tracker" = "https://github.com/kiwicom/pytest-recording/issues"
 "Source Code" = "https://github.com/kiwicom/pytest-recording"
-"Change Log" = "https://github.com/kiwicom/pytest-recording/blob/master/docs/changelog.rst"
 
 [project.entry-points.pytest11]
 recording = "pytest_recording.plugin"
 
-[tool.black]
-line-length = 120
-target_version = ["py37"]
-
-[tool.isort]
-# config compatible with Black
-line_length = 120
-multi_line_output = 3
-default_section = "THIRDPARTY"
-include_trailing_comma = true
-known_third_party = ["_pytest", "packaging", "pytest", "pytest_recording", "vcr", "yaml"]
-
 [tool.ruff]
+line-length = 120
 select = [
     "E", # pycodestyle errors
     "W", # pycodestyle warnings
@@ -76,7 +66,7 @@ select = [
     "D", # pydocstyle
 ]
 ignore = [
-    "E501", # Line too long, handled by black
+    "E501", # Line too long, handled by ruff
     "B008", # Do not perform function calls in argument defaults
     "C901", # Too complex
     "D100", # Missing docstring in public module
@@ -91,3 +81,10 @@ ignore = [
     "D401", # Imperative mood
 ]
 target-version = "py37"
+
+[tool.ruff.format]
+skip-magic-trailing-comma = false
+
+[tool.ruff.isort]
+known-first-party = ["pytest_recording"]
+known-third-party = ["_pytest", "packaging", "pytest", "vcr", "yaml"]

@@ -229,8 +229,18 @@ def test_no_vcr_mark_bytearray():
 @pytest.mark.parametrize(
     "marker, cmd_options, vcr_cfg",
     (
-        pytest.param('@pytest.mark.block_network(allowed_hosts=["127.0.0.*", "127.0.1.1"])', "", "", id="block_marker"),
-        pytest.param("", ("--block-network", "--allowed-hosts=127.0.0.*,127.0.1.1"), "", id="block_cmd"),
+        pytest.param(
+            '@pytest.mark.block_network(allowed_hosts=["127.0.0.*", "127.0.1.1"])',
+            "",
+            "",
+            id="block_marker",
+        ),
+        pytest.param(
+            "",
+            ("--block-network", "--allowed-hosts=127.0.0.*,127.0.1.1"),
+            "",
+            id="block_cmd",
+        ),
         pytest.param(
             "@pytest.mark.block_network()",
             "",
@@ -332,6 +342,7 @@ def test_pycurl(testdir):
     # When pycurl is used for network access
     testdir.makepyfile(
         r"""
+import json
 import sys
 import pytest
 import pycurl
@@ -355,7 +366,7 @@ def test_work(httpbin):
     c.setopt(c.WRITEDATA, buffer)
     c.perform()
     c.close()
-    assert buffer.getvalue() == b'{"origin":"127.0.0.1"}\n'
+    assert json.loads(buffer.getvalue()) == {"origin":"127.0.0.1"}
     """
     )
 
@@ -369,6 +380,7 @@ def test_pycurl_with_allowed_hosts(testdir):
     # When pycurl is used for network access
     testdir.makepyfile(
         r"""
+import json
 import sys
 import pytest
 import pycurl
@@ -383,7 +395,7 @@ def test_allowed(httpbin):
     c.setopt(c.WRITEDATA, buffer)
     c.perform()
     c.close()
-    assert buffer.getvalue() == b'{"origin":"127.0.0.1"}\n'
+    assert json.loads(buffer.getvalue()) == {"origin":"127.0.0.1"}
 
 @pytest.mark.block_network(allowed_hosts=["127.0.0.*", "127.0.1.1"])
 def test_blocked(httpbin):
@@ -482,9 +494,7 @@ import requests
 @pytest.mark.block_network({})
 def test_request():
     requests.get("https://google.com")
-    """.format(
-            args
-        )
+    """.format(args)
     )
     result = testdir.runpytest()
     # Then there should be an error

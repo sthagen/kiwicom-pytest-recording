@@ -18,7 +18,7 @@ jobs:
     name: Generic pre-commit checks
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 1
 
@@ -33,7 +33,7 @@ jobs:
     name: Mypy
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 1
 
@@ -101,7 +101,7 @@ jobs:
             os_version: "windows-2022"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 1
 
@@ -123,6 +123,6 @@ jobs:
       - run: coverage xml -i
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5.4.2
+        uses: codecov/codecov-action@v5.4.3
         with:
           file: ./coverage.xml
